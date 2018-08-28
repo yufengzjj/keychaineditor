@@ -1,3 +1,13 @@
+# differences from NitinJami/keychaineditor
+- `keychaineditor/usr/lib` has updated dylibs from `/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos`
+- `libswiftCoreFoundation.dylib` added
+- thinned dylibs `lipo -thin arm64 lib.dylib -output lib.dylib`
+- added entitlements (not sure which ones are needed)
+- changed signing process to use codesign instead of ldid
+
+# warning
+You must change the codesigning identity in `sign.sh` from `iPhone Developer: fartumlagigle2@gmail.com (P3YZJ8Q6SH)` to an identity on your local keychain. 
+
 # keychaineditor
 KeychainEditor is a CLI to interact with iOS's [Keychain](https://developer.apple.com/library/ios/documentation/Security/Conceptual/keychainServConcepts/01introduction/introduction.html) on a jailbroken iDevice. Keychain is a secure storage provided by the iOS to save client-side secrets/certificates onto the device. KeychainEditor is useful to dump/edit/delete a keychain item. The tool will greatly help pentesters and security researches alike who would want to poke at application's keychain usage during iOS APT (Application Penetration Test). It should be noted that the tool currently supports Generic Passwords (Genp) only and can decode the new constrainsts applied on an item.
 
