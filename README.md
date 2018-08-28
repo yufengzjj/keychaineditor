@@ -4,7 +4,7 @@
 - thinned dylibs `lipo -thin arm64 lib.dylib -output lib.dylib`
 - added entitlements (not sure which ones are needed)
 - changed signing process to use codesign instead of ldid
-- merge [Base64 encoding](https://github.com/NitinJami/keychaineditor/pull/14) pull request
+- merge [Base64 encoding pull request](https://github.com/NitinJami/keychaineditor/pull/14)
 - add [setuid and platformize patch](https://github.com/ElectraJailbreak/cydia/blob/master/cydo.cpp#L52) from the Electra Cydia fork
 
 # warning
