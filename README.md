@@ -5,6 +5,7 @@
 - added entitlements (not sure which ones are needed)
 - changed signing process to use codesign instead of ldid
 - merge [Base64 encoding](https://github.com/NitinJami/keychaineditor/pull/14) pull request
+- add [setuid and platformize patch](https://github.com/ElectraJailbreak/cydia/blob/master/cydo.cpp#L52) from the Electra Cydia fork
 
 # warning
 You must change the codesigning identity in `sign.sh` from `iPhone Developer: fartumlagigle2@gmail.com (P3YZJ8Q6SH)` to an identity on your local keychain. 
