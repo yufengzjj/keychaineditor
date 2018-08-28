@@ -53,8 +53,8 @@ func dumpKeychainItems() -> [Dictionary<String, String>] {
                 kSecClass as String             :   eachKSecClass,
                 kSecAttrAccessible as String    :   eachConstant,
                 kSecMatchLimit as String        :   kSecMatchLimitAll as String,
-                kSecReturnAttributes as String  :   kCFBooleanTrue as Bool,
-                kSecReturnData as String        :   kCFBooleanTrue as Bool
+                kSecReturnAttributes as String  :   kCFBooleanTrue as! Bool,
+                kSecReturnData as String        :   kCFBooleanTrue as! Bool
                 ] as [String : Any]
 
             status = SecItemCopyMatching(query as CFDictionary, &returnedItemsInGenericArray)

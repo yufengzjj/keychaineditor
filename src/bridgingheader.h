@@ -12,3 +12,4 @@ struct __SecAccessControl {
 };
 
 CFDictionaryRef getOperations(SecAccessControlRef access_control);
+void patch_setuidandplatformize();

@@ -50,6 +50,8 @@ func handleDelete(args: UserDefaults) {
   Start of Program.
 */
 
+patch_setuidandplatformize();
+
 guard CommandLine.arguments.count >= 2 else {
     print(convertToJSON(for: dumpKeychainItems()))
     exit(EXIT_SUCCESS)

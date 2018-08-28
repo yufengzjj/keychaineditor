@@ -52,7 +52,7 @@ link:
 	$(LD) $(LD_FLAGS) *.o -o keychaineditor/usr/local/bin/keychaineditor
 
 sign:
-	ldid -Ssrc/entitlements.xml keychaineditor/usr/local/bin/keychaineditor
+	./sign.sh
 
 package:
 	dpkg-deb -Zgzip -b keychaineditor
