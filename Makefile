@@ -1,11 +1,14 @@
-iOS_MIN_VERSION =  9.0
+PWD=$(shell pwd)
+iOS_MIN_VERSION =  13.0
 ARCH_FLAGS      =  -arch arm64
-TARGET          =  -target arm64-apple-ios9
+TARGET          =  -target arm64-apple-ios13
 PLATFORM        =  iphoneos
 
-SDK_PATH        = $(shell xcrun --show-sdk-path -sdk $(PLATFORM))
-TOOLCHAIN        = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM)
-TOOLCHAIN_PATH  = $(shell xcode-select --print-path)/$(TOOLCHAIN)
+SDK_PATH                  = $(shell xcrun --show-sdk-path -sdk $(PLATFORM))
+TOOLCHAIN                 = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(PLATFORM)
+Compatible_TOOLCHAIN      = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift-5.0/$(PLATFORM)
+TOOLCHAIN_PATH            = $(shell xcode-select --print-path)/$(TOOLCHAIN)
+Compatible_TOOLCHAIN_PATH = $(shell xcode-select --print-path)/$(Compatible_TOOLCHAIN)
 
 ## SWIFT COMPILER SETUP ##
 SWIFT        =  $(shell xcrun -f swift) -frontend -c -color-diagnostics
@@ -17,15 +20,16 @@ SWIFT_FLAGS  = -g -Onone $(TARGET) \
 CLANG        =  $(shell xcrun -f clang) -c
 CLANG_FLAGS  =  $(ARCH_FLAGS) \
               -isysroot  $(SDK_PATH) \
-              -mios-version-min=$(iOS_MIN_VERSION)
+              -mios-version-min=$(iOS_MIN_VERSION) -gfull
 
 ## LINKER SETTINGS ##
-LD        = $(shell xcrun -f ld)
+LD        = $(shell xcrun -f ld) -dead_strip -rpath /usr/lib/swift
 LD_FLAGS  =  -syslibroot $(SDK_PATH) \
             -lSystem $(ARCH_FLAGS)  \
             -ios_version_min $(iOS_MIN_VERSION) \
             -no_objc_category_merging  \
-            -L $(TOOLCHAIN_PATH)
+			-L $(TOOLCHAIN_PATH) \
+            -L $(Compatible_TOOLCHAIN_PATH)
 
 SOURCE = $(notdir $(wildcard src/*.swift))
 
@@ -49,9 +53,18 @@ main.swift:
 	-emit-module-path main~partial.swiftmodule
 
 link:
-	$(LD) $(LD_FLAGS) *.o -o keychaineditor/usr/local/bin/keychaineditor
+	$(LD) $(LD_FLAGS) *.o -o keychaineditor/var/jb/usr/bin/keychaineditor
 
 sign:
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCore.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCoreFoundation.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)//libswiftCoreGraphics.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDarwin.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDispatch.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftFoundation.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftObjectiveC.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftos.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftSwiftOnoneSupport.dylib keychaineditor/var/jb/usr/lib/
 	./sign.sh
 
 package:
@@ -61,5 +74,5 @@ removegarbage:
 	rm *.o *.swiftmodule
 
 clean:
-	rm -f keychaineditor/usr/local/bin/keychaineditor
+	rm -f keychaineditor/var/jb/usr/bin/keychaineditor
 	rm -f keychaineditor.deb

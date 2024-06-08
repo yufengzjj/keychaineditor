@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 func errorMessage(for status: OSStatus) -> String {
     switch status {
@@ -55,6 +56,9 @@ func decodeSecAccessControl(sacObj: Any?) -> String {
                     }
                 case "osgn":
                     finalDecodedValue += "PrivateKeyUsage "
+                    if operations["od"] == nil{
+                        break
+                    }
                     let constraints = operations["od"] as! Dictionary<String, AnyObject>
                     for eachConstraint in constraints.keys {
                         switch eachConstraint {
@@ -76,7 +80,6 @@ func decodeSecAccessControl(sacObj: Any?) -> String {
 }
 
 func determineTypeAndReturnString(value: Any?) -> String {
-
     if let unwrappedValue = value {
         if unwrappedValue is Data {
             if let unwrappedString = String(data: (unwrappedValue as! Data), encoding: String.Encoding.utf8) {
@@ -88,6 +91,8 @@ func determineTypeAndReturnString(value: Any?) -> String {
             let dateFMT = DateFormatter()
             dateFMT.dateFormat = "MMM dd, yyyy, hh:mm:ss zzz"
             return dateFMT.string(from: unwrappedValue as! Date)
+        }else if unwrappedValue is NSNumber {
+            return String(format: "%@", unwrappedValue as! NSNumber)
         }
         switch (unwrappedValue as! String) {
         case "ak": return "kSecAttrAccessibleWhenUnlocked"
@@ -119,20 +124,34 @@ func canonicalizeTypesInReturnedDicts(items: [Dictionary<String, Any>]) -> [Dict
         dict["Protection"] = determineTypeAndReturnString(value: eachDict[kSecAttrAccessible as String])
         dict["Data"] = determineTypeAndReturnString(value: eachDict[kSecValueData as String])
         dict["AccessControl"] = decodeSecAccessControl(sacObj: eachDict[kSecAttrAccessControl as String])
-
         arrayOfDict.append(dict)
     }
+    return arrayOfDict
+}
+func canonicalizeTypesInReturnedIdentity(items: [Dictionary<String, Any>]) -> [Dictionary<String, String>] {
 
+    var dict = Dictionary<String, String>()
+    var arrayOfDict = [Dictionary<String, String>]()
+
+    for eachDict in items {
+        dict["Account"] = determineTypeAndReturnString(value: eachDict[kSecAttrAccount as String])
+        dict["Service"] = determineTypeAndReturnString(value: eachDict[kSecAttrService as String])
+        dict["Access Group"] = determineTypeAndReturnString(value: eachDict[kSecAttrAccessGroup as String])
+        dict["Creation Time"] = determineTypeAndReturnString(value: eachDict[kSecAttrCreationDate as String])
+        dict["Modification Time"] = determineTypeAndReturnString(value: eachDict[kSecAttrModificationDate as String])
+        dict["Label"] = determineTypeAndReturnString(value: eachDict[kSecAttrLabel as String])
+        dict["PrivateKey"]=determineTypeAndReturnString(value:eachDict[kSecValueData as String])
+        dict["Cert"] = determineTypeAndReturnString(value: eachDict["certdata"])
+        dict["AccessControl"] = decodeSecAccessControl(sacObj: eachDict[kSecAttrAccessControl as String])
+        arrayOfDict.append(dict)
+    }
     return arrayOfDict
 }
 
 func search(for query: String, in items: [Dictionary<String, String>]) -> [Dictionary<String, String>] {
-
     var finalItems = [Dictionary<String, String>]()
-
     for eachItem in items {
-        let predicate = NSPredicate(format: "Account CONTAINS[cd] %@ OR Service CONTAINS[cd] %@ OR EntitlementGroup CONTAINS[cd] %@ OR Protection CONTAINS[cd] %@", query, query, query, query)
-
+        let predicate = NSPredicate(format: "Label CONTAINS[cd] %@ OR Account CONTAINS[cd] %@ OR Service CONTAINS[cd] %@ OR Protection CONTAINS[cd] %@ OR %K CONTAINS[cd] %@", query,query, query, query,"Access Group",query)
         if predicate.evaluate(with: eachItem) {
             finalItems.append(eachItem)
         }

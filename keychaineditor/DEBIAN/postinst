@@ -1,0 +1,122 @@
+#!/bin/bash
+KEYCHAIN_DUMPER_FOLDER=/var/jb/usr/bin
+if [ ! -d "$KEYCHAIN_DUMPER_FOLDER" ] ; then
+	mkdir "$KEYCHAIN_DUMPER_FOLDER" ;
+fi
+
+# set -e ;
+
+ENTITLEMENT_PATH=$KEYCHAIN_DUMPER_FOLDER/ent.xml
+TEMP=/var/tmp
+# echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $ENTITLEMENT_PATH
+# echo "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" >> $ENTITLEMENT_PATH
+# echo "<plist version=\"1.0\">" >> ENTITLEMENT_PATH
+# echo "  <dict>" >> $ENTITLEMENT_PATH
+# echo "    <key>keychain-access-groups</key>" >> $ENTITLEMENT_PATH
+# echo "    <array>" >> $ENTITLEMENT_PATH
+
+# for d in /var/mobile/Containers/Shared/AppGroup/* ; do  
+# 	cd $d ; 
+# 	echo "        <string>$(plutil -MCMMetadataIdentifier .com.apple.mobile_container_manager.metadata.plist)</string>" >> $ENTITLEMENT_PATH ; 
+# 	cd .. ; 
+# done
+
+# echo "====== Checking apps in /Applications =======" ;
+
+# i=0;
+# # amend app specific in /Applications folder
+# for d in /Applications/* ; do
+# 	i=$((i+1))	
+# 	echo $d ;
+# 	cd "$d" ;
+# 	checkingPath=`pwd` ;	
+# 	echo "Checking... $checkingPath" ;
+
+# 	executableName=`plutil -CFBundleExecutable Info.plist` ;
+# 	echo "executableName = $executableName" ;
+# 	if [ -z "$executableName" ] ; then
+# 		echo "**** Dont have Info.plist, skip this app ****" ;
+# 		continue ;
+# 	fi	
+
+# 	# extract current MachO entitlement to file
+# 	entPath=/var/mobile/entGeneratedSys-$i.xml ;
+# 	ldid -e "${executableName}" > $entPath ;	
+# 	applicationIdentifier=$(plutil -application-identifier $entPath) ;
+# 	echo "applicationIdentifier = $applicationIdentifier" ;
+
+# 	if [ ! -z "$applicationIdentifier" ] ; then
+# 		echo "        <string>$applicationIdentifier</string>" >> $ENTITLEMENT_PATH ; 		
+# 	fi
+
+	
+
+# 	# testing purpose
+# 	# if [ $i -eq 1 ]; then
+# 	# 	break ;
+# 	# fi
+
+# 	# clean up
+# 	# rm $entPath ;
+# 	# cd ../ ;
+# done
+
+# # clean /tmp/entSys-*.xml
+# rm -f /var/mobile/entGeneratedSys-*.xml ;
+
+# echo "====== Checking apps in /private/var/containers/Bundle/Application =======" ;
+
+# # amend app specific application-identifier
+# for d in /private/var/containers/Bundle/Application/* ; do
+# 	cd $d/*.app/ ;
+# 	executableName=`plutil -CFBundleExecutable Info.plist` ;
+# 	checkingPath=`pwd` ;
+# 	echo "Checking... $checkingPath" ;
+# 	# extract current MachO entitlement to file
+# 	ldid -e "${executableName}" >> ent.xml ;
+# 	applicationIdentifier=$(plutil -application-identifier ent.xml) ;
+
+# 	echo "        <string>$applicationIdentifier</string>" >> $ENTITLEMENT_PATH ; 
+
+# 	# clean up
+# 	rm ent.xml ;
+# 	cd ../../ ;
+# done
+
+# echo "    </array>">> $ENTITLEMENT_PATH
+# echo "    <key>platform-application</key> <true/>">> $ENTITLEMENT_PATH
+# echo "    <key>com.apple.private.security.no-container</key>  <true/>">> $ENTITLEMENT_PATH
+# echo "	  <key>run-unsigned-code</key>  <true/>" >> $ENTITLEMENT_PATH ;
+# echo "  </dict>">> $ENTITLEMENT_PATH
+# echo "</plist>">> $ENTITLEMENT_PATH
+
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $ENTITLEMENT_PATH
+echo "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" >> $ENTITLEMENT_PATH
+echo "<plist version=\"1.0\">" >> $ENTITLEMENT_PATH
+echo "  <dict>" >> $ENTITLEMENT_PATH
+echo "    <key>keychain-access-groups</key>" >> $ENTITLEMENT_PATH
+echo "    <array>" >> $ENTITLEMENT_PATH
+
+sqlite3 /var/Keychains/keychain-2.db "SELECT DISTINCT agrp FROM genp" > $TEMP/allgroups.txt
+sqlite3 /var/Keychains/keychain-2.db "SELECT DISTINCT agrp FROM cert" >> $TEMP/allgroups.txt
+sqlite3 /var/Keychains/keychain-2.db "SELECT DISTINCT agrp FROM inet" >> $TEMP/allgroups.txt
+sqlite3 /var/Keychains/keychain-2.db "SELECT DISTINCT agrp FROM keys" >> $TEMP/allgroups.txt
+prefix="        <string>"
+cat $TEMP/allgroups.txt | sed 's/.*/\ \ \ \ \ \ \ \ \<string\>&\<\/string\>/' >> $ENTITLEMENT_PATH
+rm $TEMP/allgroups.txt
+
+echo "    </array>">> $ENTITLEMENT_PATH
+echo "    <key>platform-application</key> <true/>">> $ENTITLEMENT_PATH
+echo "    <key>com.apple.private.security.no-container</key>  <true/>">> $ENTITLEMENT_PATH
+echo "    <key>run-unsigned-code</key>  <true/>">> $ENTITLEMENT_PATH
+echo "    <key>get-task-allow</key>  <true/>">> $ENTITLEMENT_PATH
+echo "    <key>task_for_pid-allow</key>  <true/>">> $ENTITLEMENT_PATH
+echo "  </dict>">> $ENTITLEMENT_PATH
+echo "</plist>">> $ENTITLEMENT_PATH
+
+cd $KEYCHAIN_DUMPER_FOLDER
+ldid -Sent.xml keychaineditor
+#rm ent.xml
+echo "keychaineditor signed fine"
+
+

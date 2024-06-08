@@ -41,7 +41,10 @@ func handleDelete(args: UserDefaults) {
     if let account = args.string(forKey: "-account") , let service = args.string(forKey: "-service") {
         let status = deleteKeychainItem(account: account, service: service, agroup: args.string(forKey: "-agroup"))
         print(errorMessage(for: status))
-    } else {
+    } else if let label = args.string(forKey: "-label"){
+        let status = deleteKeychainIdentity(label: label, agroup: args.string(forKey: "-agroup"))
+        print(errorMessage(for: status))
+    }else{
         printUsage()
     }
 }
@@ -58,7 +61,7 @@ guard CommandLine.arguments.count >= 2 else {
 }
 
 switch CommandLine.arguments[1] {
-case "-v": print("KeychainEditor Version = 2.1")
+case "-v": print("KeychainEditor bhzyf Version = 2.1.2")
 case "-f": handleSearch(args: UserDefaults.standard)
 case "-e": handleEdit(args: UserDefaults.standard)
 case "-d": handleDelete(args: UserDefaults.standard)

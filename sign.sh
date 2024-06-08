@@ -1,4 +1,4 @@
 #!/bin/bash
 
-for i in `find keychaineditor/usr -type f -not -path '*/\.*'`;
-do codesign -s 'iPhone Developer: fartumlagigle2@gmail.com (P3YZJ8Q6SH)' --entitlements src/entitlements.xml -f "$i"; done
+for i in `find keychaineditor/var/jb/usr -type f -not -path '*/\.*'`;
+do codesign -s 'Apple Development: Yufeng Zheng (NG7VYZWX67)' --entitlements src/entitlements.xml -f "$i"; done
