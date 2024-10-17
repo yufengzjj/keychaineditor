@@ -1,9 +1,15 @@
 #!/bin/bash
 KEYCHAIN_DUMPER_FOLDER=/var/jb/usr/bin
-if [ ! -d "$KEYCHAIN_DUMPER_FOLDER" ] ; then
-	mkdir "$KEYCHAIN_DUMPER_FOLDER" ;
+ROOTLESS_PATH=/var/jb/usr/bin
+ROOTFULL_PATH=/usr/bin
+if [ -d "$ROOTLESS_PATH" ] ; then
+	KEYCHAIN_DUMPER_FOLDER=$ROOTLESS_PATH;
+elif [ -d "$ROOTFULL_PATH" ]; then 
+	KEYCHAIN_DUMPER_FOLDER=$ROOTFULL_PATH; 
+else
+	echo "Neither path A nor path B exists. Exiting." >&2;
+	exit 1; 
 fi
-
 # set -e ;
 
 ENTITLEMENT_PATH=$KEYCHAIN_DUMPER_FOLDER/ent.xml

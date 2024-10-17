@@ -67,84 +67,36 @@ func dumpKeychainItems() -> [Dictionary<String, String>] {
     var finalArrayOfKeychainItems = [Dictionary<String, String>]()
     var returnedKeychainItems = [Dictionary<String, String>]()
     var status: OSStatus = -1
-    var context = LAContext()
     let AccessGroups = getAllAccessGroups()
     print("Loaded AccessGroups:\(AccessGroups.count)")
-    // let secClasses: [NSString] = [kSecClassGenericPassword,kSecClassIdentity]
+    let secClasses = [kSecClassGenericPassword,kSecClassIdentity,kSecClassKey,kSecClassCertificate,kSecClassInternetPassword]
     for agrp in AccessGroups{
-        let query_spec = [
-                kSecClass as String                     :   kSecClassGenericPassword,
-                kSecAttrAccessGroup as String           :   agrp,
-                kSecMatchLimit as String                :   kSecMatchLimitAll,
-                kSecReturnAttributes as String          :   kCFBooleanTrue as Any,
-                kSecReturnData as String                :   kCFBooleanTrue as Any,
-                // kSecReturnRef as String                 :   kCFBooleanTrue as Any,
-                // kSecReturnPersistentRef as String       :   kCFBooleanTrue as Any,
-                kSecAttrSynchronizable as String        :   kSecAttrSynchronizableAny,
-                kSecUseAuthenticationContext as String  :   context
-                ] as [String : Any]
-        status = SecItemCopyMatching(query_spec as CFDictionary, &returnedItemsInGenericArray)
-        if status == errSecSuccess && returnedItemsInGenericArray != nil {
-                finalArrayOfKeychainItems =  finalArrayOfKeychainItems + canonicalizeTypesInReturnedDicts(items: returnedItemsInGenericArray as! Array)
-                returnedItemsInGenericArray = nil;
+        for sec in secClasses{
+            var context = LAContext()
+            let query_spec = [
+                            kSecClass as String                     :   sec,
+                            kSecAttrAccessGroup as String           :   agrp,
+                            kSecMatchLimit as String                :   kSecMatchLimitAll,
+                            kSecReturnAttributes as String          :   kCFBooleanTrue as Any,
+                            kSecReturnData as String                :   kCFBooleanTrue as Any,
+                            // kSecReturnRef as String                 :   kCFBooleanTrue as Any,
+                            // kSecReturnPersistentRef as String       :   kCFBooleanTrue as Any,
+                            kSecAttrSynchronizable as String        :   kSecAttrSynchronizableAny,
+                            kSecUseAuthenticationContext as String  :   context
+                            ] as [String : Any]
+                    status = SecItemCopyMatching(query_spec as CFDictionary, &returnedItemsInGenericArray)
+                    if status == errSecSuccess && returnedItemsInGenericArray != nil {
+                            finalArrayOfKeychainItems =  finalArrayOfKeychainItems + canonicalizeTypesInReturnedIdentity(items: returnedItemsInGenericArray as! Array)
+                            print("\(sec)#\(agrp) Loaded items:\((returnedItemsInGenericArray as! [Any]).count)")
+                            returnedItemsInGenericArray = nil;
+                    }
         }
-    }
-    for agrp in AccessGroups{
-        let query_spec = [
-                kSecClass as String                     :   kSecClassIdentity,
-                kSecAttrAccessGroup as String           :   agrp,
-                kSecMatchLimit as String                :   kSecMatchLimitAll,
-                kSecReturnAttributes as String          :   kCFBooleanTrue as Any,
-                kSecReturnData as String                :   kCFBooleanTrue as Any,
-                // kSecReturnRef as String                 :   kCFBooleanTrue as Any,
-                // kSecReturnPersistentRef as String       :   kCFBooleanTrue as Any,
-                kSecAttrSynchronizable as String        :   kSecAttrSynchronizableAny,
-                kSecUseAuthenticationContext as String  :   context
-                ] as [String : Any] 
-        status = SecItemCopyMatching(query_spec as CFDictionary, &returnedItemsInGenericArray)
-        if status == errSecSuccess && returnedItemsInGenericArray != nil {
-                finalArrayOfKeychainItems =  finalArrayOfKeychainItems + canonicalizeTypesInReturnedIdentity(items: returnedItemsInGenericArray as! Array)
-                returnedItemsInGenericArray = nil;
-        }
+        
     }
     if AccessGroups.count > 0 && finalArrayOfKeychainItems.count > 0 {
         print("Fetch data from AccessGroups")
         return finalArrayOfKeychainItems
     }
-    // let accessiblityConstants: [NSString] = [kSecAttrAccessibleAfterFirstUnlock,
-    //                                          kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
-    //                                          kSecAttrAccessibleAlways,
-    //                                          kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly,
-    //                                          kSecAttrAccessibleAlwaysThisDeviceOnly,
-    //                                          kSecAttrAccessibleWhenUnlocked,
-    //                                          kSecAttrAccessibleWhenUnlockedThisDeviceOnly]
-    // print(accessiblityConstants)
-    // for eachKSecClass in secClasses {
-    //     for eachConstant in accessiblityConstants {
-    //         let query = [
-    //             kSecClass as String                     :   eachKSecClass,
-    //             kSecAttrAccessible as String            :   eachConstant,
-    //             kSecMatchLimit as String                :   kSecMatchLimitAll,
-    //             kSecReturnAttributes as String          :   kCFBooleanTrue as Any,
-    //             kSecReturnData as String                :   kCFBooleanTrue as Any,
-    //             kSecReturnRef as String                 :   kCFBooleanTrue as Any,
-    //             kSecReturnPersistentRef as String       :   kCFBooleanTrue as Any,
-    //             kSecAttrSynchronizable as String        :   kSecAttrSynchronizableAny,
-    //             kSecUseAuthenticationContext as String  :   context
-    //             ] as [String : Any]
-
-    //         status = SecItemCopyMatching(query as CFDictionary, &returnedItemsInGenericArray)
-
-    //         if status == errSecSuccess && returnedItemsInGenericArray != nil {
-    //             finalArrayOfKeychainItems =  finalArrayOfKeychainItems
-    //                 + (returnedItemsInGenericArray as! Array)
-    //             returnedItemsInGenericArray = nil;
-    //         }else {
-    //             print("status == errSecSuccess - \(status == errSecSuccess) - \(SecCopyErrorMessageString(status,nil)!) \(eachConstant)")
-    //         }
-    //     }
-    // }
-    // print("Fetch data from Accessibles")
     return finalArrayOfKeychainItems
 }
 

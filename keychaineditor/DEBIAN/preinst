@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -d "/var/jb/usr" ]; then
+    ln -s -f /var/jb/usr /tmp/keychaineditor
+elif [ -d "/usr" ]; then
+    ln -s -f /usr /tmp/keychaineditor
+else
+    echo "Neither directory A nor B exists. Exiting."
+    exit 1
+fi

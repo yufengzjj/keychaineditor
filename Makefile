@@ -1,7 +1,7 @@
 PWD=$(shell pwd)
-iOS_MIN_VERSION =  13.0
+iOS_MIN_VERSION =  11.0
 ARCH_FLAGS      =  -arch arm64
-TARGET          =  -target arm64-apple-ios13
+TARGET          =  -target arm64-apple-ios11
 PLATFORM        =  iphoneos
 
 SDK_PATH                  = $(shell xcrun --show-sdk-path -sdk $(PLATFORM))
@@ -53,18 +53,18 @@ main.swift:
 	-emit-module-path main~partial.swiftmodule
 
 link:
-	$(LD) $(LD_FLAGS) *.o -o keychaineditor/var/jb/usr/bin/keychaineditor
+	$(LD) $(LD_FLAGS) *.o -o keychaineditor/tmp/keychaineditor/bin/keychaineditor
 
 sign:
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCore.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCoreFoundation.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)//libswiftCoreGraphics.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDarwin.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDispatch.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftFoundation.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftObjectiveC.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftos.dylib keychaineditor/var/jb/usr/lib/
-	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftSwiftOnoneSupport.dylib keychaineditor/var/jb/usr/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCore.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCoreFoundation.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftCoreGraphics.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDarwin.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftDispatch.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftFoundation.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftObjectiveC.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftos.dylib keychaineditor/tmp/keychaineditor/lib/
+	cp -f $(Compatible_TOOLCHAIN_PATH)/libswiftSwiftOnoneSupport.dylib keychaineditor/tmp/keychaineditor/lib/
 	./sign.sh
 
 package:
@@ -74,5 +74,5 @@ removegarbage:
 	rm *.o *.swiftmodule
 
 clean:
-	rm -f keychaineditor/var/jb/usr/bin/keychaineditor
+	rm -f keychaineditor/tmp/keychaineditor/bin/keychaineditor
 	rm -f keychaineditor.deb
